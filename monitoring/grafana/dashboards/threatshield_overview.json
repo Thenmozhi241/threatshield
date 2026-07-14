@@ -1,0 +1,21 @@
+{
+  "title": "ThreatShield Overview",
+  "uid": "threatshield-overview",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "App Up",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "up{job=\"threatshield-app\"}" }]
+    },
+    {
+      "type": "graph",
+      "title": "HTTP Request Rate (requires /metrics instrumentation)",
+      "gridPos": { "h": 8, "w": 12, "x": 6, "y": 0 },
+      "targets": [{ "expr": "rate(http_requests_total[5m])" }]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Add Asset - ThreatShield{% endblock %}
+{% block page_section %}Monitor{% endblock %}
+{% block page_title %}Add Asset{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 560px;">
+    {% if error %}
+    <div class="pill pill-danger mb-3" style="display:block; padding:0.7rem 1rem;">{{ error }}</div>
+    {% endif %}
+    <form method="post" action="/assets/add">
+        <label class="form-label">Domain or IP Address</label>
+        <input type="text" class="form-control mb-3" name="name" placeholder="example.com or 203.0.113.10" required>
+
+        <label class="form-label">Asset Type</label>
+        <select class="form-select mb-3" name="asset_type_id" required>
+            {% for t in asset_types %}
+            <option value="{{ t.id }}">{{ t.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label class="form-label">Description</label>
+        <textarea class="form-control mb-3" name="description" rows="3"></textarea>
+
+        <label class="form-label">Tags (comma-separated)</label>
+        <input type="text" class="form-control mb-3" name="tags" placeholder="production, external">
+
+        <button type="submit" class="btn-primary">Add Asset</button>
+        <a href="/assets" class="btn-outline" style="margin-left:0.5rem;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

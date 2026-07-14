@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Settings - ThreatShield{% endblock %}
+{% block page_section %}Admin{% endblock %}
+{% block page_title %}System Settings{% endblock %}
+
+{% block content %}
+<div class="card">
+    <table class="data-table">
+        <thead><tr><th>Key</th><th>Value</th><th>Description</th></tr></thead>
+        <tbody>
+        {% for s in settings %}
+            <tr>
+                <td><code>{{ s.key }}</code></td>
+                <td>
+                    <form method="post" action="/settings/{{ s.key }}/update" class="d-flex gap-2">
+                        <input class="form-control" style="max-width:160px;" name="value" value="{{ s.value }}">
+                        <button class="btn-primary">Save</button>
+                    </form>
+                </td>
+                <td style="color:var(--muted); font-size:0.85rem;">{{ s.description }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <p style="font-size:0.8rem; color:var(--muted); margin-top:1rem;">
+        Notification channel credentials (SMTP, Telegram bot token, Slack webhook URL, AbuseIPDB API key)
+        are configured via environment variables (see <code>.env</code>) rather than this table, for security.
+    </p>
+</div>
+{% endblock %}

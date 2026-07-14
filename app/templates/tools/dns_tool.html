@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}DNS Records - ThreatShield{% endblock %}
+{% block page_section %}Check &amp; Lookup{% endblock %}
+{% block page_title %}DNS Records{% endblock %}
+
+{% block content %}
+<div class="card mb-3" style="max-width:600px;">
+    <form method="post" action="/tools/dns-records">
+        <label class="form-label">Domain Name</label>
+        <div class="d-flex gap-2">
+            <input type="text" class="form-control" name="domain" placeholder="example.com" value="{{ domain or '' }}" required>
+            <button type="submit" class="btn-primary">Lookup</button>
+        </div>
+    </form>
+    {% if error %}<div class="pill pill-danger mt-2" style="display:block; padding:0.6rem 1rem;">{{ error }}</div>{% endif %}
+</div>
+
+{% if records is not none %}
+<div class="card">
+    {% if records %}
+        <table class="data-table">
+            <thead><tr><th>Type</th><th>Value</th><th>TTL</th></tr></thead>
+            <tbody>
+            {% for r in records %}
+                <tr><td>{{ r.record_type }}</td><td style="word-break:break-all;">{{ r.value }}</td><td>{{ r.ttl or '-' }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-state">No DNS records found for this domain.</div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

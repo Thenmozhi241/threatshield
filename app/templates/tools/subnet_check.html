@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Subnet / CIDR Check - ThreatShield{% endblock %}
+{% block page_section %}Check &amp; Lookup{% endblock %}
+{% block page_title %}Subnet / CIDR Check{% endblock %}
+
+{% block content %}
+<div class="card mb-3" style="max-width:600px;">
+    <form method="post" action="/tools/subnet-check">
+        <label class="form-label">CIDR Range</label>
+        <div class="d-flex gap-2">
+            <input type="text" class="form-control" name="cidr" placeholder="203.0.113.0/28" value="{{ cidr or '' }}" required>
+            <button type="submit" class="btn-primary">Check</button>
+        </div>
+        <div style="font-size:0.78rem; color:var(--muted); margin-top:0.5rem;">Checks up to {{ max_hosts or 32 }} hosts in the range.</div>
+    </form>
+    {% if error %}<div class="pill pill-danger mt-2" style="display:block; padding:0.6rem 1rem;">{{ error }}</div>{% endif %}
+</div>
+
+{% if results is defined and results %}
+<div class="card">
+    {% if truncated %}<div class="pill pill-warning mb-3" style="display:block;">Range truncated to the first {{ max_hosts }} hosts.</div>{% endif %}
+    <table class="data-table">
+        <thead><tr><th>Host</th><th>Status</th><th>Listed On</th></tr></thead>
+        <tbody>
+        {% for row in results %}
+            <tr>
+                <td>{{ row.target }}</td>
+                <td>
+                    {% if row.is_blacklisted %}<span class="pill pill-danger">Blacklisted</span>
+                    {% else %}<span class="pill pill-success">Clear</span>{% endif %}
+                </td>
+                <td>{{ row.listed_count }} of {{ row.total_count }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

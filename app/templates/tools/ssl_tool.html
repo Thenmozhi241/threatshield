@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}SSL Checker - ThreatShield{% endblock %}
+{% block page_section %}Check &amp; Lookup{% endblock %}
+{% block page_title %}SSL Checker{% endblock %}
+
+{% block content %}
+<div class="card mb-3" style="max-width:600px;">
+    <form method="post" action="/tools/ssl-checker">
+        <label class="form-label">Domain or IP Address</label>
+        <div class="d-flex gap-2">
+            <input type="text" class="form-control" name="host" placeholder="example.com" value="{{ host or '' }}" required>
+            <button type="submit" class="btn-primary">Check</button>
+        </div>
+    </form>
+    {% if error %}<div class="pill pill-danger mt-2" style="display:block; padding:0.6rem 1rem;">{{ error }}</div>{% endif %}
+</div>
+
+{% if result %}
+<div class="card">
+    {% if result.error_message %}
+        <div class="empty-state">Could not retrieve certificate: {{ result.error_message }}</div>
+    {% else %}
+        <table class="data-table">
+            <tr><th>Issuer</th><td>{{ result.issuer or '-' }}</td></tr>
+            <tr><th>Subject</th><td>{{ result.subject or '-' }}</td></tr>
+            <tr><th>Valid From</th><td>{{ result.valid_from.strftime('%Y-%m-%d') if result.valid_from else '-' }}</td></tr>
+            <tr><th>Valid To</th><td>{{ result.valid_to.strftime('%Y-%m-%d') if result.valid_to else '-' }}</td></tr>
+            <tr><th>Days Remaining</th><td>{{ result.days_remaining if result.days_remaining is not none else '-' }}</td></tr>
+            <tr><th>Protocol</th><td>{{ result.protocol or '-' }}</td></tr>
+            <tr><th>Status</th><td>
+                {% if result.is_expired %}<span class="pill pill-danger">Expired</span>
+                {% else %}<span class="pill pill-success">Valid</span>{% endif %}
+            </td></tr>
+        </table>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

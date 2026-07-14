@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block title %}{{ asset.name }} - ThreatShield{% endblock %}
+{% block page_section %}Monitor / Assets{% endblock %}
+{% block page_title %}{{ asset.name }}{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <a href="/assets" style="text-decoration:none; color:var(--muted); font-size:1.1rem;">&larr;</a>
+                <span style="font-size:1.3rem; font-weight:700;">{{ asset.name }}</span>
+                <span class="pill pill-success">{{ asset.is_active }}</span>
+                <span class="pill pill-neutral">{{ asset.asset_type.name if asset.asset_type else '-' }}</span>
+            </div>
+            <div>
+                {% if blacklist_summary.total_count > 0 %}<span class="tag">BL</span>{% endif %}
+                {% if abuseipdb_configured %}<span class="tag">ABUSE</span>{% endif %}
+                {% if is_domain %}<span class="tag">DNS</span><span class="tag">WHOIS</span>{% endif %}
+                {% if ssl_result %}<span class="tag">SSL</span>{% endif %}
+                {% if server_up is not none %}<span class="tag">UP</span>{% endif %}
+                <span class="tag" style="background:var(--purple-bg); color:var(--purple);">MONITORING</span>
+            </div>
+        </div>
+        <div style="text-align:right; font-size:0.78rem; color:var(--muted);">
+            Created {{ asset.created_at.strftime('%Y-%m-%d') }}
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+        <div class="stat-box {{ 'tone-danger' if blacklist_summary.listed_count > 0 else '' }}" {{ 'style="background: var(--success-bg);"'|safe if blacklist_summary.listed_count == 0 and blacklist_summary.total_count > 0 }}>
+            <div class="stat-box-label" {{ 'style="color:var(--success);"'|safe if blacklist_summary.listed_count == 0 and blacklist_summary.total_count > 0 }}>Blacklisted</div>
+            <div class="stat-box-value" {{ 'style="color:var(--success);"'|safe if blacklist_summary.listed_count == 0 and blacklist_summary.total_count > 0 }}>
+                {{ "Yes" if blacklist_summary.listed_count > 0 else ("No" if blacklist_summary.total_count > 0 else "-") }}
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-box tone-info">
+            <div class="stat-box-label">Checks Enabled</div>
+            <div class="stat-box-value">{{ 6 if is_domain else 4 }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-box tone-purple">
+            <div class="stat-box-label">Monitoring</div>
+            <div class="stat-box-value" style="font-size:1.2rem;">{{ "Active" if asset.is_active == "active" else "Paused" }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-box">
+            <div class="stat-box-label">Open Alerts</div>
+            <div class="stat-box-value">{{ alerts|selectattr("is_resolved", "equalto", false)|list|length }}</div>
+        </div>
+    </div>
+</div>
+
+{% if blacklist_summary.total_count > 0 %}
+<div class="card mb-3">
+    <div style="font-weight:700; margin-bottom:1rem;">Blacklist History &mdash; {{ asset.name }}</div>
+    <div class="mini-bar-chart" style="height:140px;">
+        {% set pct = (blacklist_summary.listed_count / blacklist_summary.total_count * 100) if blacklist_summary.total_count else 0 %}
+        <div class="mini-bar {{ 'low' if blacklist_summary.listed_count == 0 }}" style="height: {{ [pct, 4]|max }}%; flex: 0 0 25%;"></div>
+    </div>
+    <div style="font-size:0.75rem; color:var(--muted); margin-top:0.5rem;">
+        {{ blacklist_summary.checked_at.strftime('%Y-%m-%d') if blacklist_summary.checked_at else '' }}
+    </div>
+</div>
+{% endif %}
+
+<div class="card mb-3">
+    <form method="post" action="/assets/{{ asset.id }}/scan" class="d-inline">
+        <button type="submit" class="btn-primary">Run Full Scan Now</button>
+    </form>
+    <form method="post" action="/assets/{{ asset.id }}/delete" class="d-inline" data-confirm="Delete this asset and all its history?" style="margin-left:0.5rem;">
+        <button type="submit" class="btn-danger-outline">Delete Asset</button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="tabs" data-panel-container="[data-tab-panels='asset-tabs']">
+        <a href="#" class="tab-link active" data-target="tab-ssl">🔒 SSL Certificate</a>
+        {% if is_domain %}<a href="#" class="tab-link" data-target="tab-dns">📡 DNS Records</a>{% endif %}
+        <a href="#" class="tab-link" data-target="tab-server">◉ Server Status</a>
+        <a href="#" class="tab-link" data-target="tab-abuseipdb">🛡 AbuseIPDB</a>
+        {% if is_domain %}<a href="#" class="tab-link" data-target="tab-whois">◔ WHOIS</a>{% endif %}
+        <a href="#" class="tab-link" data-target="tab-blacklist">🛡 Blacklist</a>
+    </div>
+
+    <div data-tab-panels="asset-tabs">
+        <div class="tab-panel active" id="tab-ssl">
+            {% if ssl_result %}
+                {% if ssl_result.error_message %}
+                    <div class="empty-state">Could not retrieve certificate: {{ ssl_result.error_message }}</div>
+                {% else %}
+                    <table class="data-table">
+                        <tr><th>Issuer</th><td>{{ ssl_result.issuer or '-' }}</td></tr>
+                        <tr><th>Subject</th><td>{{ ssl_result.subject or '-' }}</td></tr>
+                        <tr><th>Valid From</th><td>{{ ssl_result.valid_from.strftime('%Y-%m-%d') if ssl_result.valid_from else '-' }}</td></tr>
+                        <tr><th>Valid To</th><td>{{ ssl_result.valid_to.strftime('%Y-%m-%d') if ssl_result.valid_to else '-' }}</td></tr>
+                        <tr><th>Days Remaining</th><td>{{ ssl_result.days_remaining if ssl_result.days_remaining is not none else '-' }}</td></tr>
+                        <tr><th>Protocol</th><td>{{ ssl_result.protocol or '-' }}</td></tr>
+                        <tr><th>Status</th><td>
+                            {% if ssl_result.is_expired %}<span class="pill pill-danger">Expired</span>
+                            {% else %}<span class="pill pill-success">Valid</span>{% endif %}
+                        </td></tr>
+                    </table>
+                {% endif %}
+            {% else %}
+                <div class="empty-state">No SSL scan run yet. Click "Run Full Scan Now" above.</div>
+            {% endif %}
+        </div>
+
+        {% if is_domain %}
+        <div class="tab-panel" id="tab-dns">
+            {% if dns_records %}
+                <table class="data-table">
+                    <thead><tr><th>Type</th><th>Value</th></tr></thead>
+                    <tbody>
+                    {% for r in dns_records[:15] %}
+                        <tr><td>{{ r.record_type }}</td><td style="word-break:break-all;">{{ r.value }}</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state">No DNS records found yet. Click "Run Full Scan Now" above.</div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="tab-panel" id="tab-server">
+            {% if server_up is not none %}
+                <div class="mb-3">
+                    {% if server_up %}<span class="pill pill-success" style="font-size:0.95rem; padding:0.5rem 1rem;">● Server Up</span>
+                    {% else %}<span class="pill pill-danger" style="font-size:0.95rem; padding:0.5rem 1rem;">● Server Down</span>{% endif %}
+                </div>
+                <table class="data-table">
+                    <thead><tr><th>Port</th><th>Status</th><th>Service</th></tr></thead>
+                    <tbody>
+                    {% for p in port_results %}
+                        {% if p.is_open %}
+                        <tr><td>{{ p.port }}</td><td><span class="pill pill-warning">Open</span></td><td>{{ p.service_guess }}</td></tr>
+                        {% endif %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state">No scan run yet. Click "Run Full Scan Now" above.</div>
+            {% endif %}
+        </div>
+
+        <div class="tab-panel" id="tab-abuseipdb">
+            {% if not abuseipdb_configured %}
+                <div class="empty-state">
+                    AbuseIPDB is not configured. Add a free API key from
+                    <a href="https://www.abuseipdb.com/register" target="_blank">abuseipdb.com</a> to
+                    <code>ABUSEIPDB_API_KEY</code> in your <code>.env</code> file to enable this check.
+                </div>
+            {% elif abuseipdb_result %}
+                {% if abuseipdb_result.error %}
+                    <div class="empty-state">{{ abuseipdb_result.error }}</div>
+                {% else %}
+                    <table class="data-table">
+                        <tr><th>IP</th><td>{{ abuseipdb_result.ip }}</td></tr>
+                        <tr><th>Abuse Confidence Score</th><td>{{ abuseipdb_result.abuse_confidence_score }}%</td></tr>
+                        <tr><th>Total Reports</th><td>{{ abuseipdb_result.total_reports }}</td></tr>
+                        <tr><th>Country</th><td>{{ abuseipdb_result.country_code or '-' }}</td></tr>
+                        <tr><th>ISP</th><td>{{ abuseipdb_result.isp or '-' }}</td></tr>
+                        <tr><th>Last Reported</th><td>{{ abuseipdb_result.last_reported_at or 'Never' }}</td></tr>
+                    </table>
+                {% endif %}
+            {% else %}
+                <p style="color:var(--muted); font-size:0.88rem;">Run an on-demand AbuseIPDB reputation check for this asset.</p>
+                <a href="/assets/{{ asset.id }}/abuseipdb-check" class="btn-primary">Check AbuseIPDB Now</a>
+            {% endif %}
+        </div>
+
+        {% if is_domain %}
+        <div class="tab-panel" id="tab-whois">
+            {% if whois_result %}
+                <table class="data-table">
+                    <tr><th>Registrar</th><td>{{ whois_result.registrar or '-' }}</td></tr>
+                    <tr><th>Registrant Org</th><td>{{ whois_result.registrant_org or '-' }}</td></tr>
+                    <tr><th>Creation Date</th><td>{{ whois_result.creation_date.strftime('%Y-%m-%d') if whois_result.creation_date else '-' }}</td></tr>
+                    <tr><th>Expiration Date</th><td>{{ whois_result.expiration_date.strftime('%Y-%m-%d') if whois_result.expiration_date else '-' }}</td></tr>
+                    <tr><th>Name Servers</th><td style="word-break:break-all;">{{ whois_result.name_servers or '-' }}</td></tr>
+                </table>
+            {% else %}
+                <div class="empty-state">No WHOIS data yet. Click "Run Full Scan Now" above.</div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="tab-panel" id="tab-blacklist">
+            {% if blacklist_summary.rows %}
+                <div style="font-size:0.85rem; color:var(--muted); margin-bottom:1rem;">
+                    Listed on {{ blacklist_summary.listed_count }} of {{ blacklist_summary.total_count }} providers &middot;
+                    last checked {{ blacklist_summary.checked_at.strftime('%Y-%m-%d %H:%M') if blacklist_summary.checked_at else '-' }}
+                </div>
+                <table class="data-table">
+                    <thead><tr><th>Provider</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody>
+                    {% for row in blacklist_summary.rows %}
+                        <tr>
+                            <td>{{ row.provider }}</td>
+                            <td>
+                                {% if row.is_listed %}<span class="pill pill-danger">Blacklisted</span>
+                                {% else %}<span class="pill pill-success">Clear</span>{% endif %}
+                            </td>
+                            <td>
+                                {% if row.is_listed %}
+                                <a href="{{ delisting_links[row.provider] }}" target="_blank" class="btn-danger-outline" style="text-decoration:none;">Delist</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state">No blacklist scan run yet. Click "Run Full Scan Now" above.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

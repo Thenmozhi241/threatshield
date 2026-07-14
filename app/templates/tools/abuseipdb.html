@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}AbuseIPDB - ThreatShield{% endblock %}
+{% block page_section %}Check &amp; Lookup{% endblock %}
+{% block page_title %}AbuseIPDB{% endblock %}
+
+{% block content %}
+{% if not configured %}
+<div class="card">
+    <div class="empty-state">
+        AbuseIPDB is not configured. Add a free API key from
+        <a href="https://www.abuseipdb.com/register" target="_blank">abuseipdb.com</a> to
+        <code>ABUSEIPDB_API_KEY</code> in your <code>.env</code> file to enable this check.
+    </div>
+</div>
+{% else %}
+<div class="card mb-3" style="max-width:600px;">
+    <form method="post" action="/tools/abuseipdb">
+        <label class="form-label">IP Address</label>
+        <div class="d-flex gap-2">
+            <input type="text" class="form-control" name="ip" placeholder="203.0.113.10" value="{{ ip or '' }}" required>
+            <button type="submit" class="btn-primary">Check</button>
+        </div>
+    </form>
+    {% if error %}<div class="pill pill-danger mt-2" style="display:block; padding:0.6rem 1rem;">{{ error }}</div>{% endif %}
+</div>
+
+{% if result %}
+<div class="card">
+    {% if result.error %}
+        <div class="empty-state">{{ result.error }}</div>
+    {% else %}
+        <table class="data-table">
+            <tr><th>IP</th><td>{{ result.ip }}</td></tr>
+            <tr><th>Abuse Confidence Score</th><td>{{ result.abuse_confidence_score }}%</td></tr>
+            <tr><th>Total Reports</th><td>{{ result.total_reports }}</td></tr>
+            <tr><th>Country</th><td>{{ result.country_code or '-' }}</td></tr>
+            <tr><th>ISP</th><td>{{ result.isp or '-' }}</td></tr>
+            <tr><th>Last Reported</th><td>{{ result.last_reported_at or 'Never' }}</td></tr>
+        </table>
+    {% endif %}
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Alerts - ThreatShield{% endblock %}
+{% block page_section %}Monitor{% endblock %}
+{% block page_title %}Alerts{% endblock %}
+
+{% block content %}
+<div class="card">
+    {% if alerts %}
+    <table class="data-table">
+        <thead><tr><th>Severity</th><th>Asset</th><th>Category</th><th>Title</th><th>Status</th><th>Created</th><th></th></tr></thead>
+        <tbody>
+        {% for alert in alerts %}
+            <tr>
+                <td>
+                    {% if alert.severity == 'critical' %}<span class="pill pill-danger">Critical</span>
+                    {% elif alert.severity == 'warning' %}<span class="pill pill-warning">Warning</span>
+                    {% else %}<span class="pill pill-info">Info</span>{% endif %}
+                </td>
+                <td><a href="/assets/{{ alert.asset_id }}">Asset #{{ alert.asset_id }}</a></td>
+                <td>{{ alert.category }}</td>
+                <td>{{ alert.title }}</td>
+                <td>
+                    {% if alert.is_resolved %}<span class="pill pill-success">Resolved</span>
+                    {% else %}<span class="pill pill-neutral">Open</span>{% endif %}
+                </td>
+                <td style="color:var(--muted); font-size:0.82rem;">{{ alert.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    {% if not alert.is_resolved %}
+                    <form method="post" action="/alerts/{{ alert.id }}/resolve">
+                        <button class="btn-outline" style="cursor:pointer;">Resolve</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">No alerts. Run scans on your assets to start generating alerts.</div>
+    {% endif %}
+</div>
+{% endblock %}

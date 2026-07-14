@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThreatShield — Blacklist &amp; Threat Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B1220;
+            --surface: #111A2E;
+            --border: #1E2A3F;
+            --text: #E2E8F0;
+            --muted: #94A3B8;
+            --accent: #22D3EE;
+            --accent2: #0D9488;
+            --danger: #F87171;
+            --success: #34D399;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; font-family: 'Inter', sans-serif;
+            background: radial-gradient(ellipse at top left, #0F2438 0%, #0B1220 45%, #0B1220 100%);
+            color: var(--text); min-height: 100vh;
+        }
+        .nav {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1rem 2.5rem; border-bottom: 1px solid var(--border);
+        }
+        .brand { display: flex; align-items: center; gap: 0.6rem; }
+        .brand-mark {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent2), var(--accent));
+            display: flex; align-items: center; justify-content: center; font-weight: 700; color: #04202A;
+        }
+        .brand-name { font-weight: 700; }
+        .brand-tag { font-size: 0.72rem; color: var(--muted); }
+        .nav-links { display: flex; align-items: center; gap: 1.5rem; font-size: 0.9rem; }
+        .nav-links a { color: var(--text); text-decoration: none; }
+        .cta-btn {
+            background: linear-gradient(135deg, var(--accent2), var(--accent));
+            color: #04202A; padding: 0.55rem 1.1rem; border-radius: 8px; font-weight: 700; text-decoration: none;
+        }
+        .hero { padding: 3.5rem 2.5rem; display: grid; grid-template-columns: 1.3fr 1fr; gap: 2.5rem; max-width: 1300px; margin: 0 auto; }
+        @media (max-width: 950px) { .hero { grid-template-columns: 1fr; } }
+        .badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            border: 1px solid var(--border); border-radius: 999px; padding: 0.35rem 0.9rem;
+            font-size: 0.78rem; color: var(--accent); margin-bottom: 1.2rem;
+        }
+        h1 { font-size: 2.6rem; font-weight: 800; line-height: 1.15; margin: 0 0 1rem; }
+        h1 .highlight { color: var(--accent); }
+        .lead { color: var(--muted); font-size: 1.02rem; max-width: 520px; margin-bottom: 1.75rem; }
+        .quick-form { display: flex; gap: 0.6rem; max-width: 560px; }
+        .quick-form input {
+            flex: 1; padding: 0.85rem 1rem; border-radius: 9px; border: 1px solid var(--border);
+            background: #F1F5F9; color: #0F172A; font-size: 0.95rem;
+        }
+        .quick-form button {
+            background: linear-gradient(135deg, var(--accent2), var(--accent));
+            border: none; color: #04202A; font-weight: 700; padding: 0.85rem 1.4rem; border-radius: 9px;
+            cursor: pointer; font-size: 0.9rem; white-space: nowrap;
+        }
+        .side-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; height: fit-content; }
+        .side-card h3 { margin: 0 0 1rem; font-size: 0.95rem; }
+        .feature { display: flex; gap: 0.75rem; margin-bottom: 1.1rem; }
+        .feature-icon {
+            width: 34px; height: 34px; border-radius: 8px; background: #16233B; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; color: var(--accent);
+        }
+        .feature-title { font-weight: 600; font-size: 0.88rem; }
+        .feature-desc { font-size: 0.8rem; color: var(--muted); }
+        .tip-box { background: #0E1B30; border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem; font-size: 0.8rem; color: var(--muted); }
+        .tip-box b { color: var(--text); }
+
+        .report-wrap { max-width: 1300px; margin: 0 auto; padding: 0 2.5rem 3rem; }
+        .report-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+        .report-header { padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+        .report-header .target { color: var(--accent); }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 0.72rem; text-transform: uppercase; color: var(--muted); padding: 0.75rem 1.4rem; background: #0E1B30; }
+        td { padding: 0.7rem 1.4rem; border-top: 1px solid var(--border); font-size: 0.88rem; }
+        .status-pill { padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+        .status-blacklisted { background: #3A1418; color: var(--danger); }
+        .status-clear { background: #0F2A20; color: var(--success); }
+        .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 0.5rem; }
+        .summary-line { font-size: 0.85rem; color: var(--muted); padding: 0 1.4rem 1rem; }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="brand">
+            <span class="brand-mark">T</span>
+            <div>
+                <div class="brand-name">ThreatShield</div>
+                <div class="brand-tag">Blacklist Intelligence</div>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="#quick-check">Quick Check</a>
+            <a href="/login" class="cta-btn">Open Dashboard</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div>
+            <span class="badge">✦ Open-source threat &amp; blacklist monitoring</span>
+            <h1>Detect blacklist risk before it impacts your <span class="highlight">public services</span></h1>
+            <p class="lead">
+                ThreatShield continuously checks your domains and IPs against public DNSBLs,
+                inspects SSL/DNS/WHOIS health, and gives you a clear, actionable view of
+                what's putting your infrastructure at risk.
+            </p>
+            <form class="quick-form" method="post" action="/#quick-check" id="quick-check">
+                <input type="text" name="target" placeholder="example.com or 203.0.113.10"
+                       value="{{ target or '' }}" required>
+                <button type="submit">Run Quick Check</button>
+            </form>
+            {% if error %}<div class="error-msg">{{ error }}</div>{% endif %}
+        </div>
+        <div class="side-card">
+            <h3>Why teams choose ThreatShield</h3>
+            <div class="feature">
+                <span class="feature-icon">⟲</span>
+                <div>
+                    <div class="feature-title">Real-time provider coverage</div>
+                    <div class="feature-desc">Checks across dozens of DNSBL sources in a single pass.</div>
+                </div>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">⚡</span>
+                <div>
+                    <div class="feature-title">Fast triage workflow</div>
+                    <div class="feature-desc">Clear status summaries and provider-level detail, plus SSL/DNS/WHOIS checks.</div>
+                </div>
+            </div>
+            <div class="tip-box">
+                Tip: <b>Register a free account</b> to save assets, run full scans, get alerts, and generate reports.
+            </div>
+        </div>
+    </section>
+
+    {% if result %}
+    <div class="report-wrap">
+        <div class="report-card">
+            <div class="report-header">Blacklist Report: <span class="target">{{ target }}</span></div>
+            {% if result.error %}
+                <div class="summary-line">Could not complete the check: {{ result.error }}</div>
+            {% else %}
+                <div class="summary-line">
+                    Resolved IP: {{ result.ip }} &middot;
+                    Listed on {{ result.listed_on|length }} of {{ result.checked_providers|length }} providers checked
+                </div>
+                <table>
+                    <thead><tr><th>Provider</th><th>Status</th></tr></thead>
+                    <tbody>
+                    {% for provider in result.checked_providers %}
+                        <tr>
+                            <td>{{ provider }}</td>
+                            <td>
+                                {% if provider in result.listed_on %}
+                                    <span class="status-pill status-blacklisted">Blacklisted</span>
+                                {% else %}
+                                    <span class="status-pill status-clear">Clear</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</body>
+</html>

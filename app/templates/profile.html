@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Profile - ThreatShield{% endblock %}
+{% block page_section %}Account{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:500px;">
+    <table class="data-table">
+        <tr><th>Username</th><td>{{ user.username }}</td></tr>
+        <tr><th>Email</th><td>{{ user.email }}</td></tr>
+        <tr><th>Full name</th><td>{{ user.full_name or '-' }}</td></tr>
+        <tr><th>Role</th><td>{{ user.role.name if user.role else '-' }}</td></tr>
+        <tr><th>Joined</th><td>{{ user.created_at.strftime('%Y-%m-%d') }}</td></tr>
+    </table>
+</div>
+{% endblock %}

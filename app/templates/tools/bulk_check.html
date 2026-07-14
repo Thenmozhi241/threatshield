@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Bulk Check - ThreatShield{% endblock %}
+{% block page_section %}Check &amp; Lookup{% endblock %}
+{% block page_title %}Bulk Check{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+    <form method="post" action="/tools/bulk-check">
+        <label class="form-label">Domains or IP Addresses <span style="color:var(--muted); font-weight:400;">(one per line, up to 25)</span></label>
+        <textarea class="form-control mb-3" name="targets" rows="6" placeholder="example.com&#10;203.0.113.10&#10;another-domain.com" required>{{ raw_input or '' }}</textarea>
+        <button type="submit" class="btn-primary">Run Bulk Check</button>
+    </form>
+</div>
+
+{% if results is defined %}
+<div class="card">
+    {% if truncated %}<div class="pill pill-warning mb-3" style="display:block;">Only the first 25 targets were checked.</div>{% endif %}
+    {% if results %}
+        <table class="data-table">
+            <thead><tr><th>Target</th><th>Status</th><th>Listed On</th></tr></thead>
+            <tbody>
+            {% for row in results %}
+                <tr>
+                    <td>{{ row.target }}</td>
+                    <td>
+                        {% if not row.valid %}<span class="pill pill-neutral">Invalid target</span>
+                        {% elif row.is_blacklisted %}<span class="pill pill-danger">Blacklisted</span>
+                        {% else %}<span class="pill pill-success">Clear</span>{% endif %}
+                    </td>
+                    <td>{{ (row.listed_count ~ ' of ' ~ row.total_count) if row.valid else '-' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-state">No targets entered.</div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Blacklist Check - ThreatShield{% endblock %}
+{% block page_section %}Check &amp; Lookup{% endblock %}
+{% block page_title %}Blacklist Check{% endblock %}
+
+{% block content %}
+<div class="card mb-3" style="max-width:600px;">
+    <form method="post" action="/tools/blacklist-check">
+        <label class="form-label">Domain or IP Address</label>
+        <div class="d-flex gap-2">
+            <input type="text" class="form-control" name="target" placeholder="example.com or 203.0.113.10" value="{{ target or '' }}" required>
+            <button type="submit" class="btn-primary">Check</button>
+        </div>
+    </form>
+    {% if error %}<div class="pill pill-danger mt-2" style="display:block; padding:0.6rem 1rem;">{{ error }}</div>{% endif %}
+</div>
+
+{% if result %}
+<div class="card">
+    {% if result.error %}
+        <div class="empty-state">Could not complete check: {{ result.error }}</div>
+    {% else %}
+        <div style="font-size:0.88rem; color:var(--muted); margin-bottom:1rem;">
+            Resolved IP: <b style="color:var(--text);">{{ result.ip }}</b> &middot;
+            Listed on <b style="color:var(--text);">{{ result.listed_on|length }}</b> of {{ result.checked_providers|length }} providers
+        </div>
+        <table class="data-table">
+            <thead><tr><th>Provider</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for provider in result.checked_providers %}
+                <tr>
+                    <td>{{ provider }}</td>
+                    <td>
+                        {% if provider in result.listed_on %}<span class="pill pill-danger">Blacklisted</span>
+                        {% else %}<span class="pill pill-success">Clear</span>{% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

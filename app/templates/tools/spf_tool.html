@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}SPF/DKIM/DMARC - ThreatShield{% endblock %}
+{% block page_section %}Check &amp; Lookup{% endblock %}
+{% block page_title %}SPF / DKIM / DMARC{% endblock %}
+
+{% block content %}
+<div class="card mb-3" style="max-width:600px;">
+    <form method="post" action="/tools/spf-dkim-dmarc">
+        <label class="form-label">Domain Name</label>
+        <input type="text" class="form-control mb-3" name="domain" placeholder="example.com" value="{{ domain or '' }}" required>
+        <label class="form-label">DKIM Selector <span style="color:var(--muted); font-weight:400;">(optional, e.g. "google" or "selector1")</span></label>
+        <div class="d-flex gap-2">
+            <input type="text" class="form-control" name="dkim_selector" placeholder="default" value="{{ dkim_selector or '' }}">
+            <button type="submit" class="btn-primary">Check</button>
+        </div>
+    </form>
+    {% if error %}<div class="pill pill-danger mt-2" style="display:block; padding:0.6rem 1rem;">{{ error }}</div>{% endif %}
+</div>
+
+{% if result %}
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card">
+            <div style="font-weight:700; margin-bottom:0.75rem;">SPF</div>
+            {% if result.spf.found %}
+                <span class="pill pill-success mb-2" style="display:inline-block;">Found</span>
+                {% if result.spf.multiple_records_warning %}<div class="pill pill-warning mb-2" style="display:block;">Multiple SPF records found (invalid)</div>{% endif %}
+                <div style="font-size:0.8rem; word-break:break-all; color:var(--muted);">{{ result.spf.record }}</div>
+            {% else %}
+                <span class="pill pill-danger">Not Found</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div style="font-weight:700; margin-bottom:0.75rem;">DMARC</div>
+            {% if result.dmarc.found %}
+                <span class="pill pill-success mb-2" style="display:inline-block;">Found &middot; policy: {{ result.dmarc.policy or '-' }}</span>
+                <div style="font-size:0.8rem; word-break:break-all; color:var(--muted);">{{ result.dmarc.record }}</div>
+            {% else %}
+                <span class="pill pill-danger">Not Found</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div style="font-weight:700; margin-bottom:0.75rem;">DKIM ({{ result.dkim.selector }})</div>
+            {% if result.dkim.found %}
+                <span class="pill pill-success mb-2" style="display:inline-block;">Found</span>
+                <div style="font-size:0.8rem; word-break:break-all; color:var(--muted);">{{ result.dkim.record }}</div>
+            {% else %}
+                <span class="pill pill-danger">Not Found</span>
+                <div style="font-size:0.78rem; color:var(--muted); margin-top:0.5rem;">Try a different selector if your mail provider uses a custom one.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

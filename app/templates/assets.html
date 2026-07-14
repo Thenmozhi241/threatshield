@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Assets - ThreatShield{% endblock %}
+{% block page_section %}Monitor{% endblock %}
+{% block page_title %}Assets{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div style="color:var(--muted); font-size:0.88rem;">{{ rows|length }} asset{{ "s" if rows|length != 1 }} tracked</div>
+    <a href="/assets/add" class="btn-primary">+ Add Asset</a>
+</div>
+
+<div class="row g-3">
+    {% for row in rows %}
+    <div class="col-md-6 col-lg-4">
+        <a href="/assets/{{ row.asset.id }}" class="asset-card">
+            <span class="asset-icon" style="background: {{ 'var(--danger-bg)' if row.listed_count > 0 else 'var(--success-bg)' }}; color: {{ 'var(--danger)' if row.listed_count > 0 else 'var(--success)' }};">
+                {{ "⚠" if row.listed_count > 0 else "✓" }}
+            </span>
+            <div style="font-weight:700; font-size:1.05rem;">{{ row.asset.name }}</div>
+            <div style="font-size:0.78rem; color:var(--muted); margin-bottom:0.5rem;">
+                {{ row.asset.asset_type.name if row.asset.asset_type else '-' }}
+                <span class="pill pill-success" style="margin-left:0.35rem;">{{ row.asset.is_active }}</span>
+            </div>
+            {% if row.total_count > 0 %}
+                <div style="font-weight:600; font-size:0.88rem; color: {{ 'var(--danger)' if row.listed_count > 0 else 'var(--success)' }};">
+                    Listed on {{ row.listed_count }} of {{ row.total_count }}
+                </div>
+            {% else %}
+                <div style="font-size:0.85rem; color:var(--muted);">Not scanned yet</div>
+            {% endif %}
+            <hr style="border-color:var(--border); margin: 0.75rem 0;">
+            <div style="font-size:0.7rem; color:var(--muted);">
+                {{ row.asset.created_at.strftime('%Y-%m-%d') }}
+            </div>
+        </a>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="card empty-state">No assets yet. Add your first asset to start monitoring.</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

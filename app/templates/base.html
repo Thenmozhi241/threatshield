@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ThreatShield{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/app-shell.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <span class="brand-mark">T</span>
+            <div>
+                <div class="brand-name">ThreatShield</div>
+                <div class="brand-tagline">Threat Monitoring</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-group">
+                <div class="nav-group-label">Monitor</div>
+                <a class="nav-link {{ 'active' if request.url.path == '/dashboard' }}" href="/dashboard">
+                    <span class="nav-icon">▦</span> Dashboard
+                </a>
+                <a class="nav-link {{ 'active' if request.url.path.startswith('/assets') }}" href="/assets">
+                    <span class="nav-icon">▢</span> Assets
+                </a>
+                <a class="nav-link {{ 'active' if request.url.path == '/scans' }}" href="/scans">
+                    <span class="nav-icon">↻</span> Scan History
+                </a>
+                <a class="nav-link {{ 'active' if request.url.path == '/alerts' }}" href="/alerts">
+                    <span class="nav-icon">⚠</span> Alerts
+                </a>
+                <a class="nav-link {{ 'active' if request.url.path == '/reports' }}" href="/reports">
+                    <span class="nav-icon">▤</span> Reports
+                </a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-group-label">Check &amp; Lookup</div>
+                <a class="nav-link {{ 'active' if request.url.path == '/tools/blacklist-check' }}" href="/tools/blacklist-check">
+                    <span class="nav-icon">✓</span> Blacklist Check
+                </a>
+                <a class="nav-link {{ 'active' if request.url.path == '/tools/bulk-check' }}" href="/tools/bulk-check">
+                    <span class="nav-icon">▥</span> Bulk Check
+                </a>
+                <a class="nav-link {{ 'active' if request.url.path == '/tools/subnet-check' }}" href="/tools/subnet-check">
+                    <span class="nav-icon">▧</span> Subnet / CIDR
+                </a>
+                <a class="nav-link {{ 'active' if request.url.path == '/tools/abuseipdb' }}" href="/tools/abuseipdb">
+                    <span class="nav-icon">◈</span> AbuseIPDB
+                </a>
+                <a class="nav-link {{ 'active' if request.url.path == '/tools/whois' }}" href="/tools/whois">
+                    <span class="nav-icon">◔</span> WHOIS Lookup
+                </a>
+                <a class="nav-link {{ 'active' if request.url.path == '/tools/dns-records' }}" href="/tools/dns-records">
+                    <span class="nav-icon">≡</span> DNS Records
+                </a>
+                <a class="nav-link {{ 'active' if request.url.path == '/tools/ssl-checker' }}" href="/tools/ssl-checker">
+                    <span class="nav-icon">🔒</span> SSL Checker
+                </a>
+                <a class="nav-link {{ 'active' if request.url.path == '/tools/spf-dkim-dmarc' }}" href="/tools/spf-dkim-dmarc">
+                    <span class="nav-icon">✉</span> SPF/DKIM/DMARC
+                </a>
+                <a class="nav-link {{ 'active' if request.url.path == '/tools/server-status' }}" href="/tools/server-status">
+                    <span class="nav-icon">◉</span> Is Server Up?
+                </a>
+            </div>
+
+            {% if user and (user.is_superuser or (user.role and user.role.name == 'admin')) %}
+            <div class="nav-group">
+                <div class="nav-group-label">Admin</div>
+                <a class="nav-link {{ 'active' if request.url.path == '/users' }}" href="/users">
+                    <span class="nav-icon">◍</span> Users
+                </a>
+                <a class="nav-link {{ 'active' if request.url.path == '/settings' }}" href="/settings">
+                    <span class="nav-icon">⚙</span> Settings
+                </a>
+            </div>
+            {% endif %}
+        </nav>
+    </aside>
+
+    <div class="main">
+        <header class="topbar">
+            <div>
+                <div class="topbar-eyebrow">{% block page_section %}Security Dashboard{% endblock %}</div>
+                <div class="topbar-title">{% block page_title %}Overview{% endblock %}</div>
+            </div>
+            <div class="topbar-actions">
+                <span class="pill pill-success">● API Connected</span>
+                <button type="button" class="icon-btn" id="themeToggle" title="Toggle theme">🌙</button>
+                {% if user %}
+                <a href="/profile" class="icon-btn" title="{{ user.username }}">👤</a>
+                <a href="/logout" class="btn-outline">Sign out</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+
+<script src="/static/js/app-shell.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

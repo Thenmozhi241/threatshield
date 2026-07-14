@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Scan History - ThreatShield{% endblock %}
+{% block page_section %}Monitor{% endblock %}
+{% block page_title %}Scan History{% endblock %}
+
+{% block content %}
+<div class="card">
+    {% if scans %}
+    <table class="data-table">
+        <thead><tr><th>Asset</th><th>Type</th><th>Status</th><th>Findings</th><th>Summary</th><th>Started</th></tr></thead>
+        <tbody>
+        {% for scan in scans %}
+            <tr>
+                <td><a href="/assets/{{ scan.asset_id }}">Asset #{{ scan.asset_id }}</a></td>
+                <td>{{ scan.scan_type }}</td>
+                <td>
+                    {% if scan.status == 'completed' %}<span class="pill pill-success">Completed</span>
+                    {% elif scan.status == 'failed' %}<span class="pill pill-danger">Failed</span>
+                    {% else %}<span class="pill pill-neutral">{{ scan.status }}</span>{% endif %}
+                </td>
+                <td>{{ scan.findings_count }}</td>
+                <td style="font-size:0.85rem; color:var(--muted);">{{ scan.summary or '-' }}</td>
+                <td style="color:var(--muted); font-size:0.82rem;">{{ scan.started_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">No scans run yet.</div>
+    {% endif %}
+</div>
+{% endblock %}

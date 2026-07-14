@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}WHOIS Lookup - ThreatShield{% endblock %}
+{% block page_section %}Check &amp; Lookup{% endblock %}
+{% block page_title %}WHOIS Lookup{% endblock %}
+
+{% block content %}
+<div class="card mb-3" style="max-width:600px;">
+    <form method="post" action="/tools/whois">
+        <label class="form-label">Domain Name</label>
+        <div class="d-flex gap-2">
+            <input type="text" class="form-control" name="domain" placeholder="example.com" value="{{ domain or '' }}" required>
+            <button type="submit" class="btn-primary">Lookup</button>
+        </div>
+    </form>
+    {% if error %}<div class="pill pill-danger mt-2" style="display:block; padding:0.6rem 1rem;">{{ error }}</div>{% endif %}
+</div>
+
+{% if result %}
+<div class="card">
+    {% if result.error %}
+        <div class="empty-state">Could not complete lookup: {{ result.error }}</div>
+    {% else %}
+        <table class="data-table">
+            <tr><th>Registrar</th><td>{{ result.registrar or '-' }}</td></tr>
+            <tr><th>Registrant Org</th><td>{{ result.registrant_org or '-' }}</td></tr>
+            <tr><th>Creation Date</th><td>{{ result.creation_date.strftime('%Y-%m-%d') if result.creation_date else '-' }}</td></tr>
+            <tr><th>Expiration Date</th><td>{{ result.expiration_date.strftime('%Y-%m-%d') if result.expiration_date else '-' }}</td></tr>
+            <tr><th>Updated Date</th><td>{{ result.updated_date.strftime('%Y-%m-%d') if result.updated_date else '-' }}</td></tr>
+            <tr><th>Name Servers</th><td style="word-break:break-all;">{{ result.name_servers or '-' }}</td></tr>
+        </table>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

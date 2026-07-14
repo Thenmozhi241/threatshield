@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Is Server Up? - ThreatShield{% endblock %}
+{% block page_section %}Check &amp; Lookup{% endblock %}
+{% block page_title %}Is Server Up?{% endblock %}
+
+{% block content %}
+<div class="card mb-3" style="max-width:600px;">
+    <form method="post" action="/tools/server-status">
+        <label class="form-label">Domain or IP Address</label>
+        <div class="d-flex gap-2">
+            <input type="text" class="form-control" name="host" placeholder="example.com" value="{{ host or '' }}" required>
+            <button type="submit" class="btn-primary">Check</button>
+        </div>
+    </form>
+    {% if error %}<div class="pill pill-danger mt-2" style="display:block; padding:0.6rem 1rem;">{{ error }}</div>{% endif %}
+</div>
+
+{% if result %}
+<div class="card">
+    <div class="mb-3">
+        {% if result.is_up %}<span class="pill pill-success" style="font-size:0.95rem; padding:0.5rem 1rem;">● Server Up</span>
+        {% else %}<span class="pill pill-danger" style="font-size:0.95rem; padding:0.5rem 1rem;">● Server Down</span>{% endif %}
+    </div>
+    <table class="data-table">
+        <tr><th>Responsive Port</th><td>{{ result.responsive_port or '-' }}</td></tr>
+        <tr><th>Response Time</th><td>{{ result.response_time_ms ~ ' ms' if result.response_time_ms is not none else '-' }}</td></tr>
+        <tr><th>HTTP Status</th><td>{{ result.http_status or '-' }}</td></tr>
+        {% if result.error %}<tr><th>Error</th><td>{{ result.error }}</td></tr>{% endif %}
+    </table>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ThreatShield</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg:#0B1220; --surface:#111A2E; --border:#1E2A3F; --text:#E2E8F0; --muted:#94A3B8; --accent:#22D3EE; --accent2:#0D9488; --danger:#F87171; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; font-family: 'Inter', sans-serif; color: var(--text); min-height: 100vh;
+            background: radial-gradient(ellipse at top left, #0F2438 0%, #0B1220 45%, #0B1220 100%);
+            display: flex; align-items: center; justify-content: center; padding: 2rem;
+        }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.25rem; width: 100%; max-width: 400px; }
+        .brand { display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-bottom: 1.5rem; }
+        .brand-mark { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, var(--accent2), var(--accent)); display:flex; align-items:center; justify-content:center; font-weight:700; color:#04202A; }
+        .brand-name { font-weight: 800; font-size: 1.1rem; }
+        h1 { font-size: 1.15rem; text-align: center; margin: 0 0 0.3rem; }
+        .subtitle { text-align: center; color: var(--muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+        label { font-size: 0.82rem; font-weight: 600; margin-bottom: 0.3rem; display: block; }
+        input {
+            width: 100%; padding: 0.7rem 0.9rem; border-radius: 9px; border: 1px solid var(--border);
+            background: #0E1B30; color: var(--text); font-size: 0.92rem; margin-bottom: 1rem;
+        }
+        input:focus { outline: 1px solid var(--accent); }
+        button {
+            width: 100%; padding: 0.75rem; border: none; border-radius: 9px; font-weight: 700; cursor: pointer;
+            background: linear-gradient(135deg, var(--accent2), var(--accent)); color: #04202A; font-size: 0.92rem;
+        }
+        .foot { text-align: center; font-size: 0.85rem; color: var(--muted); margin-top: 1.1rem; }
+        .foot a { color: var(--accent); text-decoration: none; }
+        .alert { background: #3A1418; color: var(--danger); border: 1px solid #5C2027; border-radius: 8px; padding: 0.65rem 0.9rem; font-size: 0.85rem; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="brand">
+            <span class="brand-mark">T</span>
+            <span class="brand-name">ThreatShield</span>
+        </div>
+        <h1>Welcome back</h1>
+        <p class="subtitle">Sign in to your monitoring dashboard</p>
+        {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+        <form method="post" action="/login">
+            <label>Username</label>
+            <input type="text" name="username" required autofocus>
+            <label>Password</label>
+            <input type="password" name="password" required>
+            <button type="submit">Sign In</button>
+        </form>
+        <p class="foot">Don't have an account? <a href="/register">Register</a></p>
+        <p class="foot"><a href="/">&larr; Back to home</a></p>
+    </div>
+</body>
+</html>
