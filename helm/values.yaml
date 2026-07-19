@@ -1,0 +1,9 @@
+replicaCount: 2
+image:
+  repository: "your-registry/threatshield"
+  tag: "latest"
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 8000
+resources: {}
